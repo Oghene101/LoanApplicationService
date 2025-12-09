@@ -1,0 +1,19 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+
+    <ItemGroup>
+      <PackageReference Include="Dapper" />
+      <PackageReference Include="MailKit" />
+      <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
+      <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" />
+      <PackageReference Include="Microsoft.Extensions.Http.Polly" />
+      <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
+      <PackageReference Include="Polly" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\LoanApplication.Application\LoanApplication.Application.csproj" />
+      <ProjectReference Include="..\LoanApplication.Domain\LoanApplication.Domain.csproj" />
+    </ItemGroup>
+
+</Project>

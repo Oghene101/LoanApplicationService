@@ -1,0 +1,18 @@
+using LoanApplication.Domain.Entities;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+
+namespace LoanApplication.Infrastructure.Persistence.Configurations;
+
+public class AddressConfiguration : IEntityTypeConfiguration<Address>
+{
+    public void Configure(EntityTypeBuilder<Address> builder)
+    {
+        builder.HasIndex(a => a.KycVerificationId);
+        builder.HasIndex(a => new
+            {
+                a.KycVerificationId, a.HouseNumber, a.Street, a.City, a.State, a.Country
+            })
+            .IsUnique();
+    }
+}

@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+    
+    <ItemGroup>
+      <Folder Include="Features\Auth\Queries\" />
+      <Folder Include="Helpers\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\LoanApplication.Domain\LoanApplication.Domain.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="FluentValidation.DependencyInjectionExtensions" />
+      <PackageReference Include="MediatR" />
+    </ItemGroup>
+
+</Project>
