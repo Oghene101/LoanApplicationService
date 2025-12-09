@@ -3,7 +3,7 @@ using LoanApplication.Domain.Abstractions;
 
 namespace LoanApplication.Domain.Entities;
 
-public class EntityBase : IAuditable
+public abstract class EntityBase : IAuditable
 {
     [Required] public Guid Id { get; set; } = Guid.CreateVersion7();
     [Required] public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;

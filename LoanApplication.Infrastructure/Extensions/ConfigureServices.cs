@@ -1,10 +1,8 @@
 using System.Net;
-using System.Net.Http.Headers;
 using System.Security.Cryptography;
 using CharityDonationsApp.Application.Common.Contracts.Abstractions;
 using CharityDonationsApp.Application.Common.Contracts.Abstractions.Repositories;
 using LoanApplication.Application.Common.Contracts.Abstractions;
-using LoanApplication.Application.Common.Contracts.Abstractions.Repositories;
 using LoanApplication.Domain.Constants;
 using LoanApplication.Domain.Entities;
 using LoanApplication.Infrastructure.Configurations;
@@ -108,11 +106,10 @@ public static class ConfigureServices
         services.AddOptions<EmailSettings>()
             .BindConfiguration(EmailSettings.Path)
             .ValidateOnStart();
-        
-        services.AddOptions<LoanTenure>()
-            .BindConfiguration(LoanTenure.Path)
-            .ValidateOnStart();
 
+        services.AddOptions<LoanTenureSettings>()
+            .BindConfiguration(LoanTenureSettings.Path)
+            .ValidateOnStart();
     }
 
     private static void AddServices(this IServiceCollection services)

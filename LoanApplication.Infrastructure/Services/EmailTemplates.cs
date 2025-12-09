@@ -6,9 +6,9 @@ using Microsoft.Extensions.Options;
 namespace LoanApplication.Infrastructure.Services;
 
 public class EmailTemplates(
-    IOptions<LoanTenure> loanTenure) : IEmailTemplates
+    IOptions<LoanTenureSettings> loanTenure) : IEmailTemplates
 {
-    private readonly LoanTenure _loanTenure = loanTenure.Value;
+    private readonly LoanTenureSettings _loanTenure = loanTenure.Value;
 
     public string EmailConfirmation(User user, string confirmationLink)
     {
