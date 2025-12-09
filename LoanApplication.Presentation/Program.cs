@@ -31,16 +31,6 @@ app.MapScalarApiReference(options =>
         .AddPreferredSecuritySchemes("Bearer");
 });
 
-// app.MapScalarApiReference(options =>
-// {
-//     options
-//         .AddPreferredSecuritySchemes("Bearer")        // mark the scheme(s) to prefer
-//         .AddHttpAuthentication("Bearer", auth =>      // prefill the bearer token UI
-//         {
-//             auth.Token = "eyJ...";                   // only for dev/testing (visible in browser)
-//         });
-// });
-
 
 app.UseHttpsRedirection();
 app.UseMiddleware<TimingMiddleware>();
