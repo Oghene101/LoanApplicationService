@@ -3,6 +3,7 @@ using LoanApplication.Infrastructure.Extensions;
 using LoanApplication.Infrastructure.Persistence;
 using LoanApplication.Presentation.Extensions;
 using LoanApplication.Presentation.Middleware;
+using Microsoft.AspNetCore.HttpOverrides;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -31,6 +32,10 @@ app.MapScalarApiReference(options =>
         .AddPreferredSecuritySchemes("Bearer");
 });
 
+app.UseForwardedHeaders(new ForwardedHeadersOptions
+{
+    ForwardedHeaders = ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedFor
+});
 
 app.UseHttpsRedirection();
 app.UseMiddleware<TimingMiddleware>();
