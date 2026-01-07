@@ -6,14 +6,14 @@ using MediatR;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
-namespace LoanApplication.Presentation.Endpoints;
+namespace LoanApplication.Presentation.Endpoints.V2;
 
-public class AuthEndpoints : IEndpoint
+public class AuthEndpointsV2 : IEndpoint
 {
     public void MapEndpoints(IEndpointRouteBuilder app)
     {
         var apiVersionSet = app.NewApiVersionSet()
-            .HasApiVersion(new ApiVersion(1))
+            .HasApiVersion(new ApiVersion(2))
             .ReportApiVersions()
             .Build();
 
@@ -22,43 +22,43 @@ public class AuthEndpoints : IEndpoint
             .WithApiVersionSet(apiVersionSet);
 
         group.MapPost("sign-up", SignUpAsync)
-            .WithName("SignUp")
+            .WithName("SignUpV2")
             .WithSummary("Register a new user")
             .WithDescription("Creates a user account with credentials for authentication.")
             .AllowAnonymous();
 
         group.MapPost("confirm-email", ConfirmEmailAsync)
-            .WithName("ConfirmEmail")
+            .WithName("ConfirmEmailV2")
             .WithSummary("Confirm user email")
             .WithDescription("Confirms a user's email using the confirmation token.")
             .AllowAnonymous();
 
         group.MapPost("sign-in", SignInAsync)
-            .WithName("SignIn")
+            .WithName("SignInV2")
             .WithSummary("Authenticate user")
             .WithDescription("Authenticates a user with their credentials and returns access and refresh tokens.")
             .AllowAnonymous();
 
         group.MapPost("refresh-token", RefreshTokenAsync)
-            .WithName("RefreshToken")
+            .WithName("RefreshTokenV2")
             .WithSummary("Refresh access token")
             .WithDescription("Exchanges a valid refresh token for a new access token a new refresh token.")
             .AllowAnonymous();
 
         group.MapPost("change-password", ChangePasswordAsync)
-            .WithName("ChangePassword")
+            .WithName("ChangePasswordV2")
             .WithSummary("Change user password")
             .WithDescription("Allows an authenticated user to change their password.")
             .RequireAuthorization();
 
         group.MapPost("forgot-password", ForgotPasswordAsync)
-            .WithName("ForgotPassword")
+            .WithName("ForgotPasswordV2")
             .WithSummary("Request a password reset")
             .WithDescription("Sends a password reset link to the user’s registered email.")
             .AllowAnonymous();
 
         group.MapPost("reset-password", ResetPasswordAsync)
-            .WithName("ResetPassword")
+            .WithName("ResetPasswordV2")
             .WithSummary("Reset user password")
             .WithDescription("Resets the user's password using a valid reset token from the forgot password flow.")
             .AllowAnonymous();

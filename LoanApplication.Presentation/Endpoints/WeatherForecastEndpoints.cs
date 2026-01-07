@@ -1,3 +1,4 @@
+using Asp.Versioning;
 using LoanApplication.Presentation.Abstractions;
 using Microsoft.AspNetCore.Http.HttpResults;
 
@@ -7,7 +8,14 @@ public class WeatherForecastModule : IEndpoint
 {
     public void MapEndpoints(IEndpointRouteBuilder app)
     {
-        var group = app.MapGroup("api/weather-forecast").WithTags("WeatherForecast");
+        var apiVersionSet = app.NewApiVersionSet()
+            .HasApiVersion(new ApiVersion(1))
+            .ReportApiVersions()
+            .Build();
+
+        var group = app.MapGroup("api/v{apiVersion:apiVersion}/weather-forecast")
+            .WithTags("WeatherForecast")
+            .WithApiVersionSet(apiVersionSet);
 
         group.MapPost("", GetWeatherForecast)
             .WithName("GetWeatherForecast")

@@ -3,6 +3,9 @@
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
   </PropertyGroup>
   <ItemGroup>
+      <PackageVersion Include="Asp.Versioning.Http" Version="8.1.1"/>
+      <PackageVersion Include="Asp.Versioning.Mvc" Version="8.1.1"/>
+      <PackageVersion Include="Asp.Versioning.Mvc.ApiExplorer" Version="8.1.1"/>
     <PackageVersion Include="Dapper" Version="2.1.66" />
     <PackageVersion Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />
     <PackageVersion Include="MailKit" Version="4.14.1" />
@@ -16,5 +19,6 @@
     <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.0" />
     <PackageVersion Include="Polly" Version="8.6.5" />
     <PackageVersion Include="Scalar.AspNetCore" Version="2.11.1" />
+      <PackageVersion Include="Swashbuckle.AspNetCore" Version="10.1.0"/>
   </ItemGroup>
 </Project>

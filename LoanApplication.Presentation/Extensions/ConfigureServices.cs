@@ -1,3 +1,4 @@
+using Asp.Versioning;
 using LoanApplication.Presentation.Abstractions;
 using LoanApplication.Presentation.Middleware;
 
@@ -7,8 +8,17 @@ public static class ConfigureServices
 {
     public static IServiceCollection AddPresentation(this IServiceCollection services)
     {
-        services.AddOpenApi();
-        //services.AddOpenApi(options => options.AddDocumentTransformer<BearerSecuritySchemeTransformer>());
+        services.AddOpenApi("v1");
+        services.AddOpenApi("v2");
+        services.AddApiVersioning(options =>
+        {
+            options.DefaultApiVersion = new ApiVersion(1);
+            options.ApiVersionReader = new UrlSegmentApiVersionReader();
+        }).AddApiExplorer(options =>
+        {
+            options.GroupNameFormat = "'v'V";
+            options.SubstituteApiVersionInUrl = true;
+        });
 
         services.AddExceptionHandler<GlobalExceptionHandler>();
         services.AddProblemDetails();

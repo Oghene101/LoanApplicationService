@@ -1,3 +1,4 @@
+using Asp.Versioning;
 using LoanApplication.Application.Common.Contracts;
 using LoanApplication.Application.Extensions;
 using LoanApplication.Presentation.Abstractions;
@@ -12,7 +13,14 @@ public class LoanApplicationEndpoints : IEndpoint
 {
     public void MapEndpoints(IEndpointRouteBuilder app)
     {
-        var group = app.MapGroup("api/loan-application").WithTags("LoanApplication");
+        var apiVersionSet = app.NewApiVersionSet()
+            .HasApiVersion(new ApiVersion(1))
+            .ReportApiVersions()
+            .Build();
+
+        var group = app.MapGroup("api/v{apiVersion:apiVersion}/loan-application")
+            .WithTags("LoanApplication")
+            .WithApiVersionSet(apiVersionSet);
 
         group.MapPost("", ApplyForLoanAsync)
             .WithName("ApplyForLoan")

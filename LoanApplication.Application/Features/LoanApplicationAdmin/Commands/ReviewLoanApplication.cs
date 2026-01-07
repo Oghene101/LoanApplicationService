@@ -1,6 +1,7 @@
 using FluentValidation;
 using LoanApplication.Application.Common.Contracts;
 using LoanApplication.Application.Common.Contracts.Abstractions;
+using LoanApplication.Application.Common.Contracts.Abstractions.Mailing;
 using LoanApplication.Application.Common.Exceptions;
 using LoanApplication.Domain.Entities;
 using LoanApplication.Domain.Enums;

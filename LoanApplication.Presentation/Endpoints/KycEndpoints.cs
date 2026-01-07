@@ -1,3 +1,4 @@
+using Asp.Versioning;
 using LoanApplication.Application.Common.Contracts;
 using LoanApplication.Application.Extensions;
 using LoanApplication.Presentation.Abstractions;
@@ -11,7 +12,14 @@ public class KycEndpoints : IEndpoint
 {
     public void MapEndpoints(IEndpointRouteBuilder app)
     {
-        var group = app.MapGroup("api/kyc").WithTags("Kyc");
+        var apiVersionSet = app.NewApiVersionSet()
+            .HasApiVersion(new ApiVersion(1))
+            .ReportApiVersions()
+            .Build();
+
+        var group = app.MapGroup("api/v{apiVersion:apiVersion}/kyc")
+            .WithTags("Kyc")
+            .WithApiVersionSet(apiVersionSet);
 
         group.MapPost("add-bvn", AddBvnAsync)
             .WithName("AddBvn")

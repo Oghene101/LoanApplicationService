@@ -3,6 +3,7 @@ using System.Security.Cryptography;
 using CharityDonationsApp.Application.Common.Contracts.Abstractions;
 using CharityDonationsApp.Application.Common.Contracts.Abstractions.Repositories;
 using LoanApplication.Application.Common.Contracts.Abstractions;
+using LoanApplication.Application.Common.Contracts.Abstractions.Mailing;
 using LoanApplication.Domain.Constants;
 using LoanApplication.Domain.Entities;
 using LoanApplication.Infrastructure.Configurations;

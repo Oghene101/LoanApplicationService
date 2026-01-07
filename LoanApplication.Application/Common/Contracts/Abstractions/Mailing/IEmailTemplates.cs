@@ -1,6 +1,6 @@
 using LoanApplication.Domain.Entities;
 
-namespace LoanApplication.Application.Common.Contracts.Abstractions;
+namespace LoanApplication.Application.Common.Contracts.Abstractions.Mailing;
 
 public interface IEmailTemplates
 {

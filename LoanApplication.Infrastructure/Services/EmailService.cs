@@ -1,4 +1,4 @@
-using LoanApplication.Application.Common.Contracts.Abstractions;
+using LoanApplication.Application.Common.Contracts.Abstractions.Mailing;
 using LoanApplication.Infrastructure.Configurations;
 using MailKit.Net.Smtp;
 using MailKit.Security;

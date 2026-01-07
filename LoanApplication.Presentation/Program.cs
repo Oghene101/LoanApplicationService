@@ -16,11 +16,7 @@ builder.Services.AddPresentation()
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-// if (app.Environment.IsDevelopment())
-// {
 app.MapOpenApi();
-// }
 
 app.MapScalarApiReference(options =>
 {
@@ -30,6 +26,9 @@ app.MapScalarApiReference(options =>
         .SortOperationsByMethod()
         .WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.HttpClient)
         .AddPreferredSecuritySchemes("Bearer");
+
+    options.AddDocument("v1", "Loan Applications API v1", "/openapi/v1.json");
+    options.AddDocument("v2", "Loan Applications API v2", "/openapi/v2.json");
 });
 
 app.UseForwardedHeaders(new ForwardedHeadersOptions
@@ -37,6 +36,7 @@ app.UseForwardedHeaders(new ForwardedHeadersOptions
     ForwardedHeaders = ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedFor
 });
 
+app.UseHsts();
 app.UseHttpsRedirection();
 app.UseMiddleware<TimingMiddleware>();
 app.UseExceptionHandler();

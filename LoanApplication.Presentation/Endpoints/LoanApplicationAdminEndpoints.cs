@@ -1,3 +1,4 @@
+using Asp.Versioning;
 using LoanApplication.Application.Common.Contracts;
 using LoanApplication.Application.Common.Filters;
 using LoanApplication.Application.Extensions;
@@ -13,7 +14,14 @@ public class LoanApplicationAdminEndpoints : IEndpoint
 {
     public void MapEndpoints(IEndpointRouteBuilder app)
     {
-        var group = app.MapGroup("api/loan-application-admin").WithTags("LoanApplicationAdmin");
+        var apiVersionSet = app.NewApiVersionSet()
+            .HasApiVersion(new ApiVersion(1))
+            .ReportApiVersions()
+            .Build();
+
+        var group = app.MapGroup("api/v{apiVersion:apiVersion}/loan-application-admin")
+            .WithTags("LoanApplicationAdmin")
+            .WithApiVersionSet(apiVersionSet);
 
         group.MapGet("get-pending-loan-applications", GetPendingLoanApplicationsAsync)
             .WithName("GetPendingLoanApplications")

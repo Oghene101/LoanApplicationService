@@ -66,7 +66,7 @@ public class LoanApplicationRepository(
                 },
                 "Id");
 
-        var totalCount = reader.ReadSingle<int>();
+        var totalCount = await reader.ReadSingleAsync<int>();
 
         return (loanApplications, totalCount);
     }

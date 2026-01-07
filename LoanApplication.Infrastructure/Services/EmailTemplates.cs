@@ -1,4 +1,4 @@
-using LoanApplication.Application.Common.Contracts.Abstractions;
+using LoanApplication.Application.Common.Contracts.Abstractions.Mailing;
 using LoanApplication.Domain.Entities;
 using LoanApplication.Infrastructure.Configurations;
 using Microsoft.Extensions.Options;
