@@ -1,10 +1,10 @@
 namespace LoanApplication.Domain.Constants;
 
-public class Roles
+public static class Roles
 {
-    public const string Admin = "Admin";
-    public const string LoanAdmin = "LoanAdmin";
-    public const string User = "User";
+    public const string Admin = nameof(Admin);
+    public const string LoanAdmin = nameof(LoanAdmin);
+    public const string User = nameof(User);
 
-    public static readonly List<string> List = [Admin, LoanAdmin, User];
+    public static readonly string[] List = [Admin, LoanAdmin, User];
 }

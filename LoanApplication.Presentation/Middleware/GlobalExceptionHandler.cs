@@ -4,28 +4,13 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace LoanApplication.Presentation.Middleware;
 
-public class GlobalExceptionHandler(
+internal sealed class GlobalExceptionHandler(
     ILogger<GlobalExceptionHandler> logger) : IExceptionHandler
 {
-    private static readonly string Separator = new('*', 110);
-
     public async ValueTask<bool> TryHandleAsync(HttpContext httpContext, Exception exception,
         CancellationToken cancellationToken)
     {
-        logger.LogError("""
-                        {Separator} 
-                        An unhandled exception occured.
-
-                        Exception Message: {Message}
-
-                        Exception Type: {ExceptionType}
-
-                        StackTrace: {StackTrace}
-                        {Separator}
-
-                        """, Separator, exception.Message, exception.GetType().FullName ?? exception.GetType().Name,
-            exception.StackTrace,
-            Separator);
+        logger.LogError(exception, "Unhandled exception occurred while processing request");
 
         var problemDetails = exception switch
         {
@@ -69,7 +54,6 @@ public class GlobalExceptionHandler(
         {
             await httpContext.Response.WriteAsJsonAsync(problemDetails, cancellationToken);
         }
-
 
         return true;
     }

@@ -5,21 +5,14 @@ using Microsoft.Extensions.Logging;
 
 namespace LoanApplication.Infrastructure.Services;
 
-public class QueuedHostedService(
+internal sealed class QueuedHostedService(
     IBackgroundTaskQueue taskQueue,
     IServiceProvider serviceProvider,
-    ILogger<QueuedHostedService> logger)
-    : BackgroundService
+    ILogger<QueuedHostedService> logger) : BackgroundService
 {
-    private static readonly string Separator = new('*', 120);
-
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        logger.LogInformation("""
-                              {separator}
-                              {queuedHostedService} is starting.
-                              {separator}
-                              """, Separator, nameof(QueuedHostedService), Separator);
+        logger.LogInformation("{QueuedHostedService} is starting.", nameof(QueuedHostedService));
 
         while (!stoppingToken.IsCancellationRequested)
         {
@@ -28,23 +21,12 @@ public class QueuedHostedService(
             {
                 using var scope = serviceProvider.CreateScope();
                 var sp = scope.ServiceProvider;
-                await workItem(sp, stoppingToken);
+                await workItem.Run(sp, stoppingToken);
             }
             catch (Exception ex)
             {
-                logger.LogError("""
-                                {Separator} 
-                                Error occurred executing background work item in {queuedHostedService}.
-
-                                Exception Message: {Message}
-
-                                Exception Type: {ExceptionType}
-
-                                StackTrace: {StackTrace}
-                                {Separator}
-
-                                """, Separator, nameof(QueuedHostedService), ex.Message,
-                    ex.GetType().FullName ?? ex.GetType().Name, ex.StackTrace, Separator);
+                logger.LogError(ex, "Error occurred executing {TaskName} in the background {QueuedHostedService}.",
+                    workItem.TaskName, nameof(QueuedHostedService));
             }
         }
     }

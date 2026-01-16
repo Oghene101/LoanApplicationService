@@ -9,27 +9,31 @@ using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using SerilogTimings;
 
 namespace LoanApplication.Application.Features.Auth.Commands;
 
 public static class SignUp
 {
-    public record Command(
+    public sealed record Command(
         string FirstName,
         string LastName,
         string Email,
         string Password) : IRequest<Result<Guid>>;
 
-    public class Handler(
+    public sealed class Handler(
         UserManager<User> userManager,
         IBackgroundTaskQueue queue,
         IUnitOfWork uOw,
         ILogger<Handler> logger) : IRequestHandler<Command, Result<Guid>>
     {
-        private static readonly string Separator = new('*', 110);
+        private static readonly string HandlerName = typeof(Handler).GetOuterAndInnerName();
 
         public async Task<Result<Guid>> Handle(Command request, CancellationToken cancellationToken)
         {
+            using var op = Operation.Begin("{HandlerName} with Email: {Email}", HandlerName,
+                request.Email);
+
             await uOw.BeginTransactionAsync(cancellationToken);
             var user = request.ToEntity();
 
@@ -53,20 +57,22 @@ public static class SignUp
             }
             catch (Exception)
             {
+                op.Abandon();
                 await uOw.RollbackTransactionAsync(cancellationToken);
                 throw;
             }
 
-            await SendEmailAsync(user, cancellationToken);
-            
+            await SendEmailAsync(op, user, cancellationToken);
+
+            op.Complete();
             return Result.Success(user.Id);
         }
 
-        private async Task SendEmailAsync(User user, CancellationToken cancellationToken = default)
+        private async Task SendEmailAsync(Operation op, User user, CancellationToken cancellationToken = default)
         {
             try
             {
-                await queue.QueueBackgroundWorkItemAsync(async (sp, ct) =>
+                await queue.QueueBackgroundWorkItemAsync((async (sp, ct) =>
                 {
                     try
                     {
@@ -75,37 +81,24 @@ public static class SignUp
                     }
                     catch (Exception ex)
                     {
-                        // log and swallow, so it doesn't crash the worker
-                        logger.LogError("""
-                                        {Separator}
-                                        Error occured while sending email confirmation
-
-                                        Exception Message: {Message}
-
-                                        Exception Type: {ExceptionType}
-                                        {Separator}
-
-                                        Stack Trace: {StackTrace}
-
-                                        """, Separator, ex.Message,
-                            ex.GetType().FullName ?? ex.GetType().Name, ex.StackTrace, Separator);
+                        {
+                            // log and swallow, so it doesn't crash the worker
+                            logger.LogError(ex,
+                                "Error occured while sending email confirmation for user with email: {EMail}",
+                                user.Email);
+                        }
                     }
-                }, cancellationToken);
+                }, nameof(SendEmailAsync)), cancellationToken);
             }
-            catch (InvalidOperationException exception)
+            catch (InvalidOperationException ex)
             {
-                logger.LogError("""
-                                {Separator} 
-
-                                Exception Message: {Message}
-
-                                {Separator}
-                                """, Separator, exception.Message, Separator);
+                op.Abandon();
+                logger.LogError(ex, "Error occured while queueing background work item.");
             }
         }
     }
 
-    public class Validator : AbstractValidator<Command>
+    internal sealed class Validator : AbstractValidator<Command>
     {
         public Validator()
         {

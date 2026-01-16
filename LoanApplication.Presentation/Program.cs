@@ -2,11 +2,17 @@ using LoanApplication.Application.Extensions;
 using LoanApplication.Infrastructure.Extensions;
 using LoanApplication.Infrastructure.Persistence;
 using LoanApplication.Presentation.Extensions;
-using LoanApplication.Presentation.Middleware;
 using Microsoft.AspNetCore.HttpOverrides;
 using Scalar.AspNetCore;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
+
+Log.Logger = new LoggerConfiguration()
+    .ReadFrom.Configuration(builder.Configuration)
+    .CreateLogger();
+
+builder.Host.UseSerilog();
 
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
@@ -16,6 +22,10 @@ builder.Services.AddPresentation()
 
 var app = builder.Build();
 
+app.UseExceptionHandler();
+app.UseSerilogRequestLogging();
+app.UseHsts();
+app.UseHttpsRedirection();
 app.MapOpenApi();
 
 app.MapScalarApiReference(options =>
@@ -36,10 +46,6 @@ app.UseForwardedHeaders(new ForwardedHeadersOptions
     ForwardedHeaders = ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedFor
 });
 
-app.UseHsts();
-app.UseHttpsRedirection();
-app.UseMiddleware<TimingMiddleware>();
-app.UseExceptionHandler();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapEndpoints();

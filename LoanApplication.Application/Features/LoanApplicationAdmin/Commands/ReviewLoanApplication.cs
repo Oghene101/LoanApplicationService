@@ -3,18 +3,20 @@ using LoanApplication.Application.Common.Contracts;
 using LoanApplication.Application.Common.Contracts.Abstractions;
 using LoanApplication.Application.Common.Contracts.Abstractions.Mailing;
 using LoanApplication.Application.Common.Exceptions;
+using LoanApplication.Application.Extensions;
 using LoanApplication.Domain.Entities;
 using LoanApplication.Domain.Enums;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using SerilogTimings;
 using ValidationException = System.ComponentModel.DataAnnotations.ValidationException;
 
 namespace LoanApplication.Application.Features.LoanApplicationAdmin.Commands;
 
 public static class ReviewLoanApplication
 {
-    public record Command(
+    public sealed record Command(
         Guid LoanApplicationId,
         string Email,
         string FirstName,
@@ -22,17 +24,20 @@ public static class ReviewLoanApplication
         LoanApplicationStatus LoanApplicationStatus,
         string? Comment) : IRequest<Result<string>>;
 
-    public class Handler(
+    public sealed class Handler(
         IAuthService auth,
         IEmailTemplates emailTemplates,
         IUnitOfWork uOw,
         IBackgroundTaskQueue backgroundTaskQueue,
         ILogger<Handler> logger) : IRequestHandler<Command, Result<string>>
     {
-        private static readonly string Separator = new('*', 110);
+        private static readonly string HandlerName = typeof(Handler).GetOuterAndInnerName();
 
         public async Task<Result<string>> Handle(Command request, CancellationToken cancellationToken)
         {
+            using var op = Operation.Begin("{HandlerName} with Loan Application Id: {LoanApplicationId}", HandlerName,
+                request.LoanApplicationId);
+
             try
             {
                 await uOw.BeginTransactionAsync(cancellationToken);
@@ -77,7 +82,7 @@ public static class ReviewLoanApplication
                 var customerName = $"{request.FirstName} {request.LastName}";
                 var loanApplicationStatus = request.LoanApplicationStatus.ToString().ToLower();
 
-                await SendEmailAsync(request.LoanApplicationStatus, customerName, loanApplication.Amount,
+                await SendEmailAsync(op, request.LoanApplicationStatus, customerName, loanApplication.Amount,
                     loanApplication.Tenure, request.Email, cancellationToken);
 
                 return Result.Success($"You have successfully {loanApplicationStatus} {customerName}'s loan");
@@ -89,7 +94,8 @@ public static class ReviewLoanApplication
             }
         }
 
-        private async Task SendEmailAsync(LoanApplicationStatus loanApplicationStatus, string customerName,
+        private async Task SendEmailAsync(Operation op, LoanApplicationStatus loanApplicationStatus,
+            string customerName,
             decimal amount,
             int tenure, string email, CancellationToken cancellationToken = default)
         {
@@ -103,7 +109,7 @@ public static class ReviewLoanApplication
 
             try
             {
-                await backgroundTaskQueue.QueueBackgroundWorkItemAsync(async (sp, ct) =>
+                await backgroundTaskQueue.QueueBackgroundWorkItemAsync((async (sp, ct) =>
                 {
                     try
                     {
@@ -114,36 +120,21 @@ public static class ReviewLoanApplication
                     catch (Exception ex)
                     {
                         // log and swallow, so it doesn't crash the worker
-                        logger.LogError("""
-                                        {Separator}
-                                        Error occured while sending loan application review email to loan applicant
-
-                                        Exception Message: {Message}
-
-                                        Exception Type: {ExceptionType}
-                                        {Separator}
-
-                                        Stack Trace: {StackTrace}
-
-                                        """, Separator, ex.Message,
-                            ex.GetType().FullName ?? ex.GetType().Name, ex.StackTrace, Separator);
+                        logger.LogError(ex,
+                            "Error occured while sending sending loan application review email to loan applicant with email: {Email}",
+                            email);
                     }
-                }, cancellationToken);
+                }, nameof(SendEmailAsync)), cancellationToken);
             }
-            catch (InvalidOperationException exception)
+            catch (InvalidOperationException ex)
             {
-                logger.LogError("""
-                                {Separator} 
-
-                                Exception Message: {Message}
-
-                                {Separator}
-                                """, Separator, exception.Message, Separator);
+                op.Abandon();
+                logger.LogError(ex, "Error occured while queueing background work item.");
             }
         }
     }
 
-    public class Validator : AbstractValidator<Command>
+    internal sealed class Validator : AbstractValidator<Command>
     {
         public Validator()
         {

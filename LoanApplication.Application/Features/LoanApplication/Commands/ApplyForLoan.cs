@@ -7,29 +7,39 @@ using LoanApplication.Domain.Entities;
 using LoanApplication.Domain.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
+using SerilogTimings;
 
 namespace LoanApplication.Application.Features.LoanApplication.Commands;
 
 public static class ApplyForLoan
 {
-    public record Command(
+    public sealed record Command(
         decimal Amount,
         int Tenure,
         string Purpose) : IRequest<Result<string>>;
 
-    public class Handler(
+    public sealed class Handler(
         IAuthService authService,
         UserManager<User> userManager,
         IUnitOfWork uOw) : IRequestHandler<Command, Result<string>>
     {
+        private static readonly string HandlerName = typeof(Handler).GetOuterAndInnerName();
+
         public async Task<Result<string>> Handle(Command request, CancellationToken cancellationToken)
         {
+            var email = authService.GetSignedInUserEmail();
+            using var op = Operation.Begin("{HandlerName} with Email: {Email}", HandlerName,
+                email);
+
             await uOw.BeginTransactionAsync(cancellationToken);
             try
             {
-                var email = authService.GetSignedInUserEmail();
                 var user = await userManager.FindByEmailAsync(email);
-                if (user is null) throw ApiException.NotFound(new Error("LoanApplication.Error", "User not found"));
+                if (user is null)
+                {
+                    op.Abandon();
+                    throw ApiException.NotFound(new Error("LoanApplication.Error", "User not found"));
+                }
 
                 var loanApplication = request.ToEntity(user);
                 var loanApplicationHistory = new LoanApplicationHistory
@@ -44,18 +54,19 @@ public static class ApplyForLoan
                 await uOw.LoanApplicationHistoryWriteRepository.AddAsync(loanApplicationHistory, cancellationToken);
 
                 await uOw.CommitTransactionAsync(cancellationToken);
-
+                op.Complete();
                 return Result.Success("Your loan application was successful");
             }
             catch (Exception)
             {
+                op.Abandon();
                 await uOw.RollbackTransactionAsync(cancellationToken);
                 throw;
             }
         }
     }
 
-    public class Validator : AbstractValidator<Command>
+    internal sealed class Validator : AbstractValidator<Command>
     {
         public Validator()
         {

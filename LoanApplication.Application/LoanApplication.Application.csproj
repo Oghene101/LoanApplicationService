@@ -12,6 +12,7 @@
     <ItemGroup>
       <PackageReference Include="FluentValidation.DependencyInjectionExtensions" />
       <PackageReference Include="MediatR" />
+        <PackageReference Include="SerilogTimings"/>
     </ItemGroup>
 
 </Project>

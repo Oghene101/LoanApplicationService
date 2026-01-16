@@ -12,7 +12,7 @@ using LoanApp = LoanApplication.Application.Common.Contracts.LoanApplication;
 
 namespace LoanApplication.Application.Extensions;
 
-public static class Mappers
+public static class MappingExtensions
 {
     #region To Entity
 

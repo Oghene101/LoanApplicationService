@@ -1,49 +1,65 @@
-using CharityDonationsApp.Application.Common.Contracts;
 using FluentValidation;
 using LoanApplication.Application.Common.Contracts;
 using LoanApplication.Application.Common.Contracts.Abstractions;
 using LoanApplication.Application.Common.Exceptions;
+using LoanApplication.Application.Extensions;
 using LoanApplication.Domain.Entities;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
+using SerilogTimings;
 
 namespace LoanApplication.Application.Features.Auth.Commands;
 
 public static class ChangePassword
 {
-    public record Command(
+    public sealed record Command(
         string OldPassword,
         string NewPassword) : IRequest<Result<string>>;
 
-    public class Handler(
+    public sealed class Handler(
         UserManager<User> userManager,
         IAuthService auth,
         IUnitOfWork uOw) : IRequestHandler<Command, Result<string>>
     {
+        private static readonly string HandlerName = typeof(Handler).GetOuterAndInnerName();
+
         public async Task<Result<string>> Handle(Command request, CancellationToken cancellationToken)
         {
             var email = auth.GetSignedInUserEmail();
+            using var op = Operation.Begin("{HandlerName} with Email: {Email}", HandlerName,
+                email);
 
             var user = await userManager.FindByEmailAsync(email);
-            if (user is null) throw ApiException.BadRequest(new Error("Auth.Error", "Invalid request"));
+            if (user is null)
+            {
+                op.Abandon();
+                throw ApiException.BadRequest(new Error("Auth.Error", "Invalid request"));
+            }
 
             var isCorrectPassword = await userManager.CheckPasswordAsync(user, request.OldPassword);
             if (!isCorrectPassword)
+            {
+                op.Abandon();
                 throw ApiException.BadRequest(new Error("Auth.Error", "Invalid request"));
+            }
 
             var result = await userManager.ChangePasswordAsync(user, request.OldPassword, request.NewPassword);
             if (!result.Succeeded)
+            {
+                op.Abandon();
                 throw ApiException.BadRequest(result.Errors.Select(e => new Error(e.Code, e.Description)).ToArray());
+            }
 
             user.UpdatedBy = $"{user.FirstName} {user.LastName}";
             user.UpdatedAt = DateTimeOffset.UtcNow;
             await uOw.SaveChangesAsync(cancellationToken);
 
+            op.Complete();
             return Result.Success("Password changed successfully");
         }
     }
 
-    public class Validator : AbstractValidator<Command>
+    internal sealed class Validator : AbstractValidator<Command>
     {
         public Validator()
         {

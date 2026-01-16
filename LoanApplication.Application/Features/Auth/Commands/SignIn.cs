@@ -1,36 +1,49 @@
-using CharityDonationsApp.Application.Common.Contracts;
 using FluentValidation;
 using LoanApplication.Application.Common.Contracts;
 using LoanApplication.Application.Common.Contracts.Abstractions;
 using LoanApplication.Application.Common.Exceptions;
+using LoanApplication.Application.Extensions;
 using LoanApplication.Domain.Entities;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
+using SerilogTimings;
 
 namespace LoanApplication.Application.Features.Auth.Commands;
 
 public static class SignIn
 {
-    public record Command(string Email, string Password) : IRequest<Result<Common.Contracts.Auth.SignInResponse>>;
+    public sealed record Command(string Email, string Password)
+        : IRequest<Result<Common.Contracts.Auth.SignInResponse>>;
 
-    public class Handler(
+    public sealed class Handler(
         UserManager<User> userManager,
         IJwtService jwt,
         IAuthService auth,
         IUtilityService utility) : IRequestHandler<Command, Result<Common.Contracts.Auth.SignInResponse>>
     {
+        private static readonly string HandlerName = typeof(Handler).GetOuterAndInnerName();
         private const string SignInTokenCacheKey = "UserAuthToken";
         private const string UserRolesCacheKey = "UserRoles";
 
         public async Task<Result<Common.Contracts.Auth.SignInResponse>> Handle(Command request,
             CancellationToken cancellationToken)
         {
+            using var op = Operation.Begin("{HandlerName} with Email: {Email}", HandlerName,
+                request.Email);
+
             var user = await userManager.FindByEmailAsync(request.Email);
-            if (user is null) throw ApiException.BadRequest(new Error("Auth.Error", "Incorrect email or password"));
+            if (user is null)
+            {
+                op.Abandon();
+                throw ApiException.BadRequest(new Error("Auth.Error", "Incorrect email or password"));
+            }
 
             if (await userManager.IsLockedOutAsync(user))
+            {
+                op.Abandon();
                 throw ApiException.BadRequest(new Error("Auth.Error",
                     $"Your account has been locked for {(user.LockoutEnd! - DateTimeOffset.UtcNow).Value.TotalSeconds} seconds. Try again later"));
+            }
 
             await auth.CheckPassword(new Authentication.CheckPasswordRequest(user, request.Password));
 
@@ -58,11 +71,12 @@ public static class SignIn
                 utility.SetInMemoryCache(userRolesCacheKey, roles, absoluteExpirationRelativeToNow);
             }
 
+            op.Complete();
             return Result.Success(new Common.Contracts.Auth.SignInResponse(user.Id, roles!, generateTokenResponse!));
         }
     }
 
-    public class Validator : AbstractValidator<Command>
+    internal sealed class Validator : AbstractValidator<Command>
     {
         public Validator()
         {
