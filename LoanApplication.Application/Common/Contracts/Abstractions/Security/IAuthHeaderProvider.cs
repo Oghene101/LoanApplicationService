@@ -1,4 +1,4 @@
-namespace LoanApplication.Application.Common.Contracts.Abstractions;
+namespace LoanApplication.Application.Common.Contracts.Abstractions.Security;
 
 public interface IAuthHeaderProvider
 {

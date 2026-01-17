@@ -9,7 +9,7 @@ using LoanApp = LoanApplication.Application.Common.Contracts.LoanApplication;
 
 namespace LoanApplication.Presentation.Endpoints;
 
-public class LoanApplicationEndpoints : IEndpoint
+internal sealed class LoanApplicationEndpoints : IEndpoints
 {
     public void MapEndpoints(IEndpointRouteBuilder app)
     {

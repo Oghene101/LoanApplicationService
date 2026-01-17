@@ -1,10 +1,6 @@
-using System.Reflection;
-using LoanApplication.Application.Common.Contracts.Abstractions;
-using LoanApplication.Domain.Attributes;
+using LoanApplication.Application.Common.Contracts.Abstractions.Security;
 using LoanApplication.Domain.Entities;
-using LoanApplication.Infrastructure.Persistence.Comparators;
 using LoanApplication.Infrastructure.Persistence.Configurations;
-using LoanApplication.Infrastructure.Persistence.Converters;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -27,20 +23,5 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
         var encryptionProvider = this.GetService<IEncryptionProvider>();
         modelBuilder.ApplyConfiguration(new KycVerificationConfiguration(encryptionProvider));
-
-        foreach (var entityType in modelBuilder.Model.GetEntityTypes())
-        {
-            foreach (var property in entityType.GetProperties())
-            {
-                if (property.ClrType != typeof(string)) continue;
-
-                var memberInfo = property.PropertyInfo ?? (MemberInfo)property.FieldInfo;
-                if (memberInfo == null || !Attribute.IsDefined(memberInfo, typeof(EncryptedAttribute))) continue;
-
-                property.SetValueConverter(new EncryptedConverter(encryptionProvider));
-                property.SetValueComparer(new EncryptedConverterComparer());
-            }
-        }
     }
-
 }

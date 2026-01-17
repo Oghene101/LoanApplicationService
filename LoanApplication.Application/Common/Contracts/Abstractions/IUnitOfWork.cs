@@ -1,4 +1,3 @@
-using CharityDonationsApp.Application.Common.Contracts.Abstractions.Repositories;
 using LoanApplication.Application.Common.Contracts.Abstractions.Repositories;
 using LoanApplication.Domain.Entities;
 

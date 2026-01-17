@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace LoanApplication.Presentation.Endpoints;
 
-public class WeatherForecastModule : IEndpoint
+internal sealed class WeatherForecastModule : IEndpoints
 {
     public void MapEndpoints(IEndpointRouteBuilder app)
     {

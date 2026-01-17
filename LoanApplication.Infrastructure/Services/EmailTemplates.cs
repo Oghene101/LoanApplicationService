@@ -5,7 +5,7 @@ using Microsoft.Extensions.Options;
 
 namespace LoanApplication.Infrastructure.Services;
 
-public class EmailTemplates(
+internal sealed class EmailTemplates(
     IOptions<LoanTenureSettings> loanTenure) : IEmailTemplates
 {
     private readonly LoanTenureSettings _loanTenure = loanTenure.Value;

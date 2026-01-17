@@ -31,13 +31,13 @@ public static class EndpointRegistrationExtensions
 {
     public static void MapEndpoints(this IEndpointRouteBuilder app)
     {
-        var endpointTypes = typeof(IEndpoint).Assembly
+        var endpointTypes = typeof(IEndpoints).Assembly
             .GetTypes()
-            .Where(t => !t.IsAbstract && typeof(IEndpoint).IsAssignableFrom(t));
+            .Where(t => !t.IsAbstract && typeof(IEndpoints).IsAssignableFrom(t));
 
         foreach (var type in endpointTypes)
         {
-            var instance = (IEndpoint)Activator.CreateInstance(type)!;
+            var instance = (IEndpoints)Activator.CreateInstance(type)!;
             instance.MapEndpoints(app);
         }
     }

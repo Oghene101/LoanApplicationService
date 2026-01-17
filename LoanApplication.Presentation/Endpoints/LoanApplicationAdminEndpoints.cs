@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace LoanApplication.Presentation.Endpoints;
 
-public class LoanApplicationAdminEndpoints : IEndpoint
+internal sealed class LoanApplicationAdminEndpoints : IEndpoints
 {
     public void MapEndpoints(IEndpointRouteBuilder app)
     {

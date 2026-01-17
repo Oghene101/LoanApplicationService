@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace LoanApplication.Presentation.Endpoints.V2;
 
-public class AuthEndpointsV2 : IEndpoint
+public class AuthEndpointsV2 : IEndpoints
 {
     public void MapEndpoints(IEndpointRouteBuilder app)
     {

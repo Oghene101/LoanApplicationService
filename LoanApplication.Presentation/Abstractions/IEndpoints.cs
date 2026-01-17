@@ -1,6 +1,6 @@
 namespace LoanApplication.Presentation.Abstractions;
 
-public interface IEndpoint
+internal interface IEndpoints
 {
     public void MapEndpoints(IEndpointRouteBuilder app);
 }

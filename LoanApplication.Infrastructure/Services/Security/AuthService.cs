@@ -2,6 +2,7 @@ using System.Security.Claims;
 using LoanApplication.Application.Common.Contracts;
 using LoanApplication.Application.Common.Contracts.Abstractions;
 using LoanApplication.Application.Common.Contracts.Abstractions.Mailing;
+using LoanApplication.Application.Common.Contracts.Abstractions.Security;
 using LoanApplication.Application.Common.Exceptions;
 using LoanApplication.Domain.Entities;
 using LoanApplication.Infrastructure.Configurations;
@@ -9,9 +10,9 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 
-namespace LoanApplication.Infrastructure.Services;
+namespace LoanApplication.Infrastructure.Services.Security;
 
-public class AuthService(
+internal sealed class AuthService(
     UserManager<User> userManager,
     IOptions<EmailSettings> emailSettings,
     IOptions<ApiEndpoints> apiEndpoints,

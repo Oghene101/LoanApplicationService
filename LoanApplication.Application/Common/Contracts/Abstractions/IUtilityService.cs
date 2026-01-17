@@ -10,5 +10,4 @@ public interface IUtilityService
 
     bool TryGetInMemoryCacheValue<TItem>(string key, out TItem? value);
     void RemoveInMemoryCache(object key);
-    string ComputeSha256Hash(string input);
 }

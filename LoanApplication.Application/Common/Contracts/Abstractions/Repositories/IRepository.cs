@@ -1,10 +1,10 @@
 using System.Linq.Expressions;
+using LoanApplication.Domain.Entities;
 
-namespace CharityDonationsApp.Application.Common.Contracts.Abstractions.Repositories;
+namespace LoanApplication.Application.Common.Contracts.Abstractions.Repositories;
 
-public interface IRepository<TEntity> where TEntity : class
+public interface IRepository<TEntity> where TEntity : EntityBase
 {
-    Task<TEntity?> FindAsync(object id, CancellationToken cancellationToken = default);
     Task AddAsync(TEntity entity, CancellationToken cancellationToken = default);
     void Update(TEntity entity, params Expression<Func<TEntity, object>>[] updatedProperties);
 }

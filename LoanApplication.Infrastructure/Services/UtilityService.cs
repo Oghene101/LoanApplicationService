@@ -1,11 +1,9 @@
-using System.Security.Cryptography;
-using System.Text;
 using LoanApplication.Application.Common.Contracts.Abstractions;
 using Microsoft.Extensions.Caching.Memory;
 
 namespace LoanApplication.Infrastructure.Services;
 
-public class UtilityService(
+internal sealed class UtilityService(
     IMemoryCache memoryCache) : IUtilityService
 {
     #region Cache
@@ -26,12 +24,4 @@ public class UtilityService(
     public void RemoveInMemoryCache(object key) => memoryCache.Remove(key);
 
     #endregion
-
-    public string ComputeSha256Hash(string input)
-    {
-        if (string.IsNullOrEmpty(input))
-            return string.Empty;
-        var bytes = SHA256.HashData(Encoding.UTF8.GetBytes(input));
-        return Convert.ToBase64String(bytes);
-    }
 }

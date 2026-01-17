@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace LoanApplication.Presentation.Endpoints;
 
-public class KycEndpoints : IEndpoint
+internal sealed class KycEndpoints : IEndpoints
 {
     public void MapEndpoints(IEndpointRouteBuilder app)
     {

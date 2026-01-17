@@ -1,7 +1,7 @@
-using CharityDonationsApp.Application.Common.Contracts;
 using FluentValidation;
 using LoanApplication.Application.Common.Contracts;
 using LoanApplication.Application.Common.Contracts.Abstractions;
+using LoanApplication.Application.Common.Contracts.Abstractions.Security;
 using LoanApplication.Application.Common.Exceptions;
 using LoanApplication.Domain.Entities;
 using MediatR;
@@ -14,7 +14,7 @@ public class AddNin
 
     public class Handler(
         IAuthService auth,
-        IUtilityService utility,
+        IHashingService hashing,
         IUnitOfWork uOw) : IRequestHandler<Command, Result<string>>
     {
         public async Task<Result<string>> Handle(Command request, CancellationToken cancellationToken)
@@ -27,7 +27,7 @@ public class AddNin
             {
                 kycVerification = new KycVerification
                 {
-                    NinCipher = request.Nin, NinHash = utility.ComputeSha256Hash(request.Nin),
+                    NinCipher = request.Nin, NinHash = hashing.Compute(request.Nin).Hash,
                     IsNinSuccessfullyVerified = false, UserId = userId, CreatedBy = userName,
                     UpdatedBy = userName
                 };
@@ -36,7 +36,7 @@ public class AddNin
             else if (kycVerification.NinCipher is null && kycVerification.NinHash is null)
             {
                 kycVerification.NinCipher = request.Nin;
-                kycVerification.NinHash = utility.ComputeSha256Hash(request.Nin);
+                kycVerification.NinHash = hashing.Compute(request.Nin).Hash;
                 kycVerification.IsNinSuccessfullyVerified = false;
                 kycVerification.UpdatedBy = userName;
 

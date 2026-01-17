@@ -1,24 +1,24 @@
+using System.Data;
 using Dapper;
-using LoanApplication.Application.Common.Contracts.Abstractions;
 using LoanApplication.Application.Common.Contracts.Abstractions.Repositories;
 using LoanApplication.Domain.Entities;
 
 namespace LoanApplication.Infrastructure.Persistence.Repositories;
 
-public class LoanApplicationRepository(
-    IDbConnectionFactory connectionFactory) : ILoanApplicationRepository
+internal sealed class LoanApplicationRepository(
+    IDbConnection connection,
+    IDbTransaction? transaction) : ILoanApplicationRepository
 {
     public async Task<Domain.Entities.LoanApplication?> GetLoanApplicationByIdAsync(
         Guid id)
     {
-        using var connection = connectionFactory.CreateConnection();
         var sql = """
                   SELECT * FROM "LoanApplications"
                            Where "Id" = @id
                   """;
 
         var result =
-            await connection.QueryFirstOrDefaultAsync<Domain.Entities.LoanApplication>(sql, new { id });
+            await connection.QueryFirstOrDefaultAsync<Domain.Entities.LoanApplication>(sql, new { id }, transaction);
 
         return result;
     }
@@ -29,8 +29,6 @@ public class LoanApplicationRepository(
     {
         var parameters = new DynamicParameters();
         var whereClause = """ WHERE 1=1 AND LA."ApplicationStatus" = 0 """;
-
-        using var connection = connectionFactory.CreateConnection();
 
         if (startDate.HasValue && endDate.HasValue)
         {
@@ -56,7 +54,7 @@ public class LoanApplicationRepository(
                    {whereClause};
                    """;
 
-        await using var reader = await connection.QueryMultipleAsync(sql, parameters);
+        await using var reader = await connection.QueryMultipleAsync(sql, parameters, transaction);
         var loanApplications =
             reader.Read<Domain.Entities.LoanApplication, User, Domain.Entities.LoanApplication>(
                 (loanApplication, user) =>

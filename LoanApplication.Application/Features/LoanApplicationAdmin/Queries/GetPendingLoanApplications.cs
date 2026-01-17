@@ -1,5 +1,6 @@
 using LoanApplication.Application.Common.Contracts;
 using LoanApplication.Application.Common.Contracts.Abstractions;
+using LoanApplication.Application.Common.Contracts.Abstractions.Security;
 using LoanApplication.Application.Common.Filters;
 using LoanApplication.Application.Extensions;
 using MediatR;

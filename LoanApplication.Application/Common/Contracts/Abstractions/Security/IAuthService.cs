@@ -1,4 +1,6 @@
-namespace LoanApplication.Application.Common.Contracts.Abstractions;
+using LoanApplication.Domain.Entities;
+
+namespace LoanApplication.Application.Common.Contracts.Abstractions.Security;
 
 public interface IAuthService
 {
@@ -10,7 +12,7 @@ public interface IAuthService
     string GetSignedInUserId();
     string GetSignedInUserEmail();
     string GetSignedInUserName();
-    Task SendEmailConfirmationAsync(Domain.Entities.User user, CancellationToken cancellationToken = default);
-    Task SendForgotPasswordEmailAsync(Domain.Entities.User user, CancellationToken cancellationToken = default);
+    Task SendEmailConfirmationAsync(User user, CancellationToken cancellationToken = default);
+    Task SendForgotPasswordEmailAsync(User user, CancellationToken cancellationToken = default);
     Task<bool> CheckPassword(Authentication.CheckPasswordRequest request);
 }

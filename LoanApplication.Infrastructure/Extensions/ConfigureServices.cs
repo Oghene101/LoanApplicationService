@@ -1,9 +1,10 @@
 using System.Net;
 using System.Security.Cryptography;
 using CharityDonationsApp.Application.Common.Contracts.Abstractions;
-using CharityDonationsApp.Application.Common.Contracts.Abstractions.Repositories;
 using LoanApplication.Application.Common.Contracts.Abstractions;
 using LoanApplication.Application.Common.Contracts.Abstractions.Mailing;
+using LoanApplication.Application.Common.Contracts.Abstractions.Repositories;
+using LoanApplication.Application.Common.Contracts.Abstractions.Security;
 using LoanApplication.Domain.Constants;
 using LoanApplication.Domain.Entities;
 using LoanApplication.Infrastructure.Configurations;
@@ -11,6 +12,7 @@ using LoanApplication.Infrastructure.Persistence;
 using LoanApplication.Infrastructure.Persistence.DbContexts;
 using LoanApplication.Infrastructure.Persistence.Repositories;
 using LoanApplication.Infrastructure.Services;
+using LoanApplication.Infrastructure.Services.Security;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -38,9 +40,6 @@ public static class ConfigureServices
     {
         services.AddDbContext<AppDbContext>(options =>
             options.UseNpgsql(config.GetConnectionString("DefaultConnection")));
-
-        services.AddSingleton<IDbConnectionFactory>(_ =>
-            new SqlConnectionFactory(config.GetConnectionString("DefaultConnection")!));
 
         services.AddIdentity<User, IdentityRole<Guid>>(options =>
             {
@@ -119,15 +118,25 @@ public static class ConfigureServices
         services.AddHttpContextAccessor();
         services.AddHostedService<QueuedHostedService>();
         services.AddSingleton<IBackgroundTaskQueue, BackgroundTaskQueue>();
-        services.AddSingleton<IEncryptionProvider, AesEncryptionProvider>();
         services.AddSingleton<IEmailTemplates, EmailTemplates>();
         services.AddScoped<IUtilityService, UtilityService>();
-        services.AddScoped<IJwtService, JwtService>();
         services.AddScoped<IApiClient, ApiClient>();
         services.AddScoped<IEmailService, EmailService>();
-        services.AddScoped<IAuthService, AuthService>();
         services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
         services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+        #region Security
+
+        services.AddScoped<IAuthService, AuthService>();
+        services.AddScoped<IJwtService, JwtService>();
+        services.AddSingleton<ISecuritySettingsProvider, SecuritySettingsProvider>();
+        services.AddSingleton<IEncryptionKeyStore, EncryptionKeyStore>();
+        services.AddSingleton<IEncryptionProvider, EncryptionProvider>();
+        services.AddSingleton<IHashingKeyStore, HashingKeyStore>();
+        services.AddSingleton<IHashingService, HashingService>();
+        services.AddSingleton<IMaskingService, MaskingService>();
+
+        #endregion
     }
 
     private static void AddHttpClientExtensions(this IServiceCollection services, IConfiguration config)

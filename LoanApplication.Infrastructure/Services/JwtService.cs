@@ -1,8 +1,6 @@
 using System.IdentityModel.Tokens.Jwt;
-using System.Runtime.InteropServices.JavaScript;
 using System.Security.Claims;
 using System.Security.Cryptography;
-using CharityDonationsApp.Application.Common.Contracts.Abstractions;
 using LoanApplication.Application.Common.Contracts;
 using LoanApplication.Application.Common.Contracts.Abstractions;
 using LoanApplication.Application.Common.Exceptions;
@@ -13,7 +11,7 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace LoanApplication.Infrastructure.Services;
 
-public class JwtService(
+internal sealed class JwtService(
     IOptions<JwtSettings> jwt,
     IUnitOfWork uOw) : IJwtService
 {

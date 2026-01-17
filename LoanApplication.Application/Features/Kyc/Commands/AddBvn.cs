@@ -1,7 +1,7 @@
-using CharityDonationsApp.Application.Common.Contracts;
 using FluentValidation;
 using LoanApplication.Application.Common.Contracts;
 using LoanApplication.Application.Common.Contracts.Abstractions;
+using LoanApplication.Application.Common.Contracts.Abstractions.Security;
 using LoanApplication.Application.Common.Exceptions;
 using LoanApplication.Domain.Entities;
 using MediatR;
@@ -14,7 +14,7 @@ public static class AddBvn
 
     public class Handler(
         IAuthService auth,
-        IUtilityService utility,
+        IHashingService hashing,
         IUnitOfWork uOw) : IRequestHandler<Command, Result<string>>
     {
         public async Task<Result<string>> Handle(Command request, CancellationToken cancellationToken)
@@ -27,7 +27,7 @@ public static class AddBvn
             {
                 kycVerification = new KycVerification
                 {
-                    BvnCipher = request.Bvn, BvnHash = utility.ComputeSha256Hash(request.Bvn),
+                    BvnCipher = request.Bvn, BvnHash = hashing.Compute(request.Bvn).Hash,
                     IsBvnSuccessfullyVerified = false, UserId = userId, CreatedBy = userName,
                     UpdatedBy = userName
                 };
@@ -36,7 +36,7 @@ public static class AddBvn
             else if (kycVerification.BvnCipher is null && kycVerification.BvnHash is null)
             {
                 kycVerification.BvnCipher = request.Bvn;
-                kycVerification.BvnHash = utility.ComputeSha256Hash(request.Bvn);
+                kycVerification.BvnHash = hashing.Compute(request.Bvn).Hash;
                 kycVerification.IsBvnSuccessfullyVerified = false;
                 kycVerification.UpdatedBy = userName;
 

@@ -7,7 +7,7 @@ using MimeKit;
 
 namespace LoanApplication.Infrastructure.Services;
 
-public class EmailService(
+internal sealed class EmailService(
     IOptions<EmailSettings> email) : IEmailService
 {
     private readonly EmailSettings _email = email.Value;

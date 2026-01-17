@@ -1,7 +1,7 @@
-using CharityDonationsApp.Application.Common.Contracts;
 using FluentValidation;
 using LoanApplication.Application.Common.Contracts;
 using LoanApplication.Application.Common.Contracts.Abstractions;
+using LoanApplication.Application.Common.Contracts.Abstractions.Security;
 using LoanApplication.Application.Common.Exceptions;
 using LoanApplication.Application.Extensions;
 using LoanApplication.Domain.Entities;

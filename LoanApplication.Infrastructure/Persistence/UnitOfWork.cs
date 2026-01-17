@@ -1,25 +1,22 @@
 using System.Data;
 using System.Diagnostics.CodeAnalysis;
-using CharityDonationsApp.Application.Common.Contracts.Abstractions.Repositories;
 using LoanApplication.Application.Common.Contracts.Abstractions;
 using LoanApplication.Application.Common.Contracts.Abstractions.Repositories;
 using LoanApplication.Domain.Entities;
 using LoanApplication.Infrastructure.Persistence.DbContexts;
 using LoanApplication.Infrastructure.Persistence.Repositories;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
-using Npgsql;
-using Transaction = System.Transactions.Transaction;
 
 namespace LoanApplication.Infrastructure.Persistence;
 
 public class UnitOfWork(
-    AppDbContext context,
-    IDbConnectionFactory connectionFactory) : IUnitOfWork, IAsyncDisposable
+    AppDbContext context) : IUnitOfWork, IAsyncDisposable
 {
-    private IDbConnection? _connection;
     private IDbContextTransaction? _transaction;
+    public IDbConnection DbConnection => context.Database.GetDbConnection();
+    public IDbTransaction? DbTransaction => _transaction?.GetDbTransaction();
 
-    private IDbConnection Connection => _connection ??= connectionFactory.CreateConnection();
 
     # region Repositories
 
@@ -27,7 +24,7 @@ public class UnitOfWork(
 
     [field: AllowNull, MaybeNull]
     public IRefreshTokenRepository RefreshTokensReadRepository =>
-        field ??= new RefreshTokenRepository(connectionFactory);
+        field ??= new RefreshTokenRepository(DbConnection, DbTransaction);
 
     [field: AllowNull, MaybeNull]
     public IRepository<RefreshToken> RefreshTokensWriteRepository =>
@@ -39,7 +36,7 @@ public class UnitOfWork(
 
     [field: AllowNull, MaybeNull]
     public IKycVerificationRepository KycVerificationsReadRepository =>
-        field ??= new KycVerificationRepository(connectionFactory);
+        field ??= new KycVerificationRepository(DbConnection, DbTransaction);
 
     [field: AllowNull, MaybeNull]
     public IRepository<KycVerification> KycVerificationsWriteRepository =>
@@ -51,28 +48,28 @@ public class UnitOfWork(
 
     [field: AllowNull, MaybeNull]
     public IAddressRepository AddressesReadRepository =>
-        field ??= new AddressRepository(connectionFactory);
+        field ??= new AddressRepository(DbConnection, DbTransaction);
 
     [field: AllowNull, MaybeNull]
     public IRepository<Address> AddressesWriteRepository =>
         field ??= new Repository<Address>(context);
 
     #endregion
-    
+
     #region LoanApplications
 
     [field: AllowNull, MaybeNull]
     public ILoanApplicationRepository LoanApplicationsReadRepository =>
-        field ??= new LoanApplicationRepository(connectionFactory);
+        field ??= new LoanApplicationRepository(DbConnection, DbTransaction);
 
     [field: AllowNull, MaybeNull]
     public IRepository<Domain.Entities.LoanApplication> LoanApplicationsWriteRepository =>
         field ??= new Repository<Domain.Entities.LoanApplication>(context);
 
     #endregion
-    
+
     #region LoanApplicationHistory
-    
+
     [field: AllowNull, MaybeNull]
     public IRepository<LoanApplicationHistory> LoanApplicationHistoryWriteRepository =>
         field ??= new Repository<LoanApplicationHistory>(context);
@@ -85,17 +82,14 @@ public class UnitOfWork(
 
     public async Task BeginTransactionAsync(CancellationToken cancellationToken = default)
     {
-        if (_transaction != null) throw new InvalidOperationException("There is already an active transaction.");
-        _transaction = await context.Database.BeginTransactionAsync(cancellationToken);
+        if (_transaction is not null) throw new InvalidOperationException("There is already an active transaction.");
 
-        var sqlConnection = (NpgsqlConnection)Connection;
-        if (sqlConnection.State == ConnectionState.Closed) await sqlConnection.OpenAsync(cancellationToken);
-        sqlConnection.EnlistTransaction(Transaction.Current!);
+        _transaction = await context.Database.BeginTransactionAsync(cancellationToken);
     }
 
     public async Task CommitTransactionAsync(CancellationToken cancellationToken = default)
     {
-        if (_transaction == null) throw new InvalidOperationException("There is no active transaction.");
+        if (_transaction is null) throw new InvalidOperationException("There is no active transaction.");
         await SaveChangesAsync(cancellationToken);
         await _transaction.CommitAsync(cancellationToken);
         await DisposeTransactionAsync();
@@ -120,11 +114,9 @@ public class UnitOfWork(
     public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         => await context.SaveChangesAsync(cancellationToken);
 
-
     public async ValueTask DisposeAsync()
     {
         if (_transaction is not null) await _transaction.DisposeAsync();
-        _connection?.Dispose();
     }
 
     #endregion

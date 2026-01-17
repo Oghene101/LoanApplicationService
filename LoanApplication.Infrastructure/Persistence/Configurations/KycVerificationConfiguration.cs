@@ -1,6 +1,5 @@
-using LoanApplication.Application.Common.Contracts.Abstractions;
+using LoanApplication.Application.Common.Contracts.Abstractions.Security;
 using LoanApplication.Domain.Entities;
-using LoanApplication.Infrastructure.Persistence.Converters;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -14,7 +13,5 @@ public class KycVerificationConfiguration(
         builder.HasIndex(k => k.UserId).IsUnique();
         builder.HasIndex(k => k.BvnHash).IsUnique();
         builder.HasIndex(k => k.NinHash).IsUnique();
-        builder.Property(k => k.BvnCipher).HasConversion(new EncryptedConverter(encryptionProvider));
-        builder.Property(k => k.NinCipher).HasConversion(new EncryptedConverter(encryptionProvider));
     }
 }
