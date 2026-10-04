@@ -12,8 +12,8 @@ internal sealed class KycVerificationRepository(
     public async Task<KycVerification?> GetKycVerificationAsync(Guid userId)
     {
         var sql = """
-                  SELECT * FROM KycVerifications 
-                           WHERE UserId = @userId
+                  SELECT * FROM "KycVerifications"
+                           WHERE "UserId" = @userId
                   """;
 
         var result = await connection.QuerySingleOrDefaultAsync<KycVerification>(sql, new { userId }, transaction);
@@ -23,9 +23,9 @@ internal sealed class KycVerificationRepository(
     public async Task<KycVerification?> GetKycVerificationWithAddressesAsync(Guid userId)
     {
         var sql = """
-                  SELECT * FROM KycVerifications as K
-                           LEFT JOIN Addresses as A ON K.Id = A.KycVerificationId
-                           WHERE UserId = @userId
+                  SELECT * FROM "KycVerifications" AS K
+                           LEFT JOIN "Addresses" AS A ON K."Id" = A."KycVerificationId"
+                           WHERE K."UserId" = @userId
                   """;
 
         var dictionary = new Dictionary<Guid, KycVerification>();

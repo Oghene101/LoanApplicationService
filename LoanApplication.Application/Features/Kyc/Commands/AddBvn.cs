@@ -15,6 +15,7 @@ public static class AddBvn
     public class Handler(
         IAuthService auth,
         IHashingService hashing,
+        IEncryptionProvider encryption,
         IUnitOfWork uOw) : IRequestHandler<Command, Result<string>>
     {
         public async Task<Result<string>> Handle(Command request, CancellationToken cancellationToken)
@@ -25,9 +26,11 @@ public static class AddBvn
 
             if (kycVerification is null)
             {
+                var encryptedBvn = encryption.Encrypt(request.Bvn);
                 kycVerification = new KycVerification
                 {
-                    BvnCipher = request.Bvn, BvnHash = hashing.Compute(request.Bvn).Hash,
+                    BvnCipher = encryptedBvn.CipherText, BvnCipherKeyId = encryptedBvn.KeyId,
+                    BvnHash = hashing.Compute(request.Bvn).Hash,
                     IsBvnSuccessfullyVerified = false, UserId = userId, CreatedBy = userName,
                     UpdatedBy = userName
                 };
@@ -35,13 +38,16 @@ public static class AddBvn
             }
             else if (kycVerification.BvnCipher is null && kycVerification.BvnHash is null)
             {
-                kycVerification.BvnCipher = request.Bvn;
+                var encryptedBvn = encryption.Encrypt(request.Bvn);
+                kycVerification.BvnCipher = encryptedBvn.CipherText;
+                kycVerification.BvnCipherKeyId = encryptedBvn.KeyId;
                 kycVerification.BvnHash = hashing.Compute(request.Bvn).Hash;
                 kycVerification.IsBvnSuccessfullyVerified = false;
                 kycVerification.UpdatedBy = userName;
 
                 uOw.KycVerificationsWriteRepository.Update(kycVerification,
                     x => x.BvnCipher!,
+                    x => x.BvnCipherKeyId!,
                     x => x.BvnHash!,
                     x => x.IsBvnSuccessfullyVerified!,
                     x => x.UpdatedBy);

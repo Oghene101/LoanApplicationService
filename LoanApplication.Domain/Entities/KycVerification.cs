@@ -4,12 +4,14 @@ namespace LoanApplication.Domain.Entities;
 
 public class KycVerification : EntityBase
 {
-    [MaxLength(50)] public string? BvnCipher { get; set; }
+    [MaxLength(100)] public string? BvnCipher { get; set; }
+    [MaxLength(50)] public string? BvnCipherKeyId { get; set; }
     [MaxLength(50)] public string? BvnHash { get; set; }
     public bool? IsBvnSuccessfullyVerified { get; set; }
     public DateTimeOffset? BvnVerifiedAt { get; set; }
     [MaxLength(100)] public string? BvnVerificationReference { get; set; }
-    [MaxLength(50)] public string? NinCipher { get; set; }
+    [MaxLength(100)] public string? NinCipher { get; set; }
+    [MaxLength(50)] public string? NinCipherKeyId { get; set; }
     [MaxLength(50)] public string? NinHash { get; set; }
     public bool? IsNinSuccessfullyVerified { get; set; }
     public DateTimeOffset? NinVerifiedAt { get; set; }

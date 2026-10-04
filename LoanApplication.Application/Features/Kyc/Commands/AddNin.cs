@@ -15,6 +15,7 @@ public class AddNin
     public class Handler(
         IAuthService auth,
         IHashingService hashing,
+        IEncryptionProvider encryption,
         IUnitOfWork uOw) : IRequestHandler<Command, Result<string>>
     {
         public async Task<Result<string>> Handle(Command request, CancellationToken cancellationToken)
@@ -25,9 +26,11 @@ public class AddNin
 
             if (kycVerification is null)
             {
+                var encryptedNin = encryption.Encrypt(request.Nin);
                 kycVerification = new KycVerification
                 {
-                    NinCipher = request.Nin, NinHash = hashing.Compute(request.Nin).Hash,
+                    NinCipher = encryptedNin.CipherText, NinCipherKeyId = encryptedNin.KeyId,
+                    NinHash = hashing.Compute(request.Nin).Hash,
                     IsNinSuccessfullyVerified = false, UserId = userId, CreatedBy = userName,
                     UpdatedBy = userName
                 };
@@ -35,13 +38,16 @@ public class AddNin
             }
             else if (kycVerification.NinCipher is null && kycVerification.NinHash is null)
             {
-                kycVerification.NinCipher = request.Nin;
+                var encryptedNin = encryption.Encrypt(request.Nin);
+                kycVerification.NinCipher = encryptedNin.CipherText;
+                kycVerification.NinCipherKeyId = encryptedNin.KeyId;
                 kycVerification.NinHash = hashing.Compute(request.Nin).Hash;
                 kycVerification.IsNinSuccessfullyVerified = false;
                 kycVerification.UpdatedBy = userName;
 
                 uOw.KycVerificationsWriteRepository.Update(kycVerification,
                     x => x.NinCipher!,
+                    x => x.NinCipherKeyId!,
                     x => x.NinHash!,
                     x => x.IsNinSuccessfullyVerified!,
                     x => x.UpdatedBy);

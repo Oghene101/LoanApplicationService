@@ -1,10 +1,7 @@
-using LoanApplication.Application.Common.Contracts.Abstractions.Security;
 using LoanApplication.Domain.Entities;
-using LoanApplication.Infrastructure.Persistence.Configurations;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
 
 namespace LoanApplication.Infrastructure.Persistence.DbContexts;
 
@@ -21,7 +18,5 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
     {
         base.OnModelCreating(modelBuilder);
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
-        var encryptionProvider = this.GetService<IEncryptionProvider>();
-        modelBuilder.ApplyConfiguration(new KycVerificationConfiguration(encryptionProvider));
     }
 }

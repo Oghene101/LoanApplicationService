@@ -86,6 +86,10 @@ public static class ConfigureServices
 
     private static void AddOptions(this IServiceCollection services)
     {
+        services.AddOptions<SecuritySettings>()
+            .BindConfiguration(SecuritySettings.Path)
+            .ValidateOnStart();
+
         services.AddOptions<AuthSettings>()
             .BindConfiguration(AuthSettings.Path)
             .ValidateOnStart();
@@ -100,6 +104,10 @@ public static class ConfigureServices
 
         services.AddOptions<EncryptionSettings>()
             .BindConfiguration(EncryptionSettings.Path)
+            .ValidateOnStart();
+
+        services.AddOptions<HashingSettings>()
+            .BindConfiguration(HashingSettings.Path)
             .ValidateOnStart();
 
         services.AddOptions<EmailSettings>()
