@@ -1,0 +1,39 @@
+# Build output
+**/bin/
+**/obj/
+artifacts/
+
+# Test results
+**/TestResults/
+*.trx
+*.coverage
+coverage*.json
+coverage*.xml
+
+# User-specific files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.DotSettings.user
+
+# JetBrains
+.idea/
+*.iml
+
+# Visual Studio / VS Code
+.vs/
+.vscode/
+
+# NuGet
+*.nupkg
+*.snupkg
+project.lock.json
+project.fragment.lock.json
+
+# Local config
+.env
+.env.local
+
+# macOS
+.DS_Store
