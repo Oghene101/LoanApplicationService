@@ -25,8 +25,7 @@ public static class RefreshToken
         public async Task<Result<Jwt.GenerateTokenResponse>> Handle(Command request,
             CancellationToken cancellationToken)
         {
-            using var op = Operation.Begin("{HandlerName} with Access Token: {AccessToken}", HandlerName,
-                request.AccessToken);
+            using var op = Operation.Begin("{HandlerName}", HandlerName);
 
             ClaimsPrincipal principal;
             ClaimsIdentity identity;
@@ -41,6 +40,7 @@ public static class RefreshToken
             }
 
             var email = principal.FindFirstValue(ClaimTypes.Email);
+            if (email is not null) op.EnrichWith("Email", email);
 
             var user = await userManager.FindByEmailAsync(email!);
             if (user is null)
