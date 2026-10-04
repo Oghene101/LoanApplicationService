@@ -1,6 +1,5 @@
 using System.Net;
 using System.Security.Cryptography;
-using CharityDonationsApp.Application.Common.Contracts.Abstractions;
 using LoanApplication.Application.Common.Contracts.Abstractions;
 using LoanApplication.Application.Common.Contracts.Abstractions.Mailing;
 using LoanApplication.Application.Common.Contracts.Abstractions.Repositories;

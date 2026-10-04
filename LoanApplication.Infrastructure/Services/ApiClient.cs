@@ -1,6 +1,6 @@
 using System.Diagnostics;
 using System.Net.Http.Json;
-using CharityDonationsApp.Application.Common.Contracts.Abstractions;
+using LoanApplication.Application.Common.Contracts.Abstractions;
 using Microsoft.Extensions.Logging;
 
 namespace LoanApplication.Infrastructure.Services;

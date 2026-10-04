@@ -1,4 +1,4 @@
-namespace CharityDonationsApp.Application.Common.Contracts.Abstractions;
+namespace LoanApplication.Application.Common.Contracts.Abstractions;
 
 public interface IApiClient
 {

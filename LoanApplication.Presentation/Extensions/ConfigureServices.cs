@@ -8,8 +8,20 @@ public static class ConfigureServices
 {
     public static IServiceCollection AddPresentation(this IServiceCollection services)
     {
-        services.AddOpenApi("v1");
+        // todo: add bearer security scheme transformer 
+        // Implementation at https://learn.microsoft.com/en-us/aspnet/core/fundamentals/openapi/customize-openapi?view=aspnetcore-10.0
+        services.AddOpenApi("v1", options =>
+        {
+            options.AddDocumentTransformer((document, context, cancellationToken) =>
+            {
+                document.Info.Title = "Loan Applications API";
+                document.Info.Version = "v1";
+
+                return Task.CompletedTask;
+            });
+        });
         services.AddOpenApi("v2");
+
         services.AddApiVersioning(options =>
         {
             options.DefaultApiVersion = new ApiVersion(1);

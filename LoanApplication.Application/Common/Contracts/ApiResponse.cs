@@ -1,6 +1,5 @@
 using System.Net;
 using System.Text.Json.Serialization;
-using CharityDonationsApp.Application.Common.Contracts;
 
 namespace LoanApplication.Application.Common.Contracts;
 
