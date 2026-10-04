@@ -12,8 +12,8 @@ internal sealed class AddressRepository(
     public async Task<IEnumerable<Address>> GetAddressesAsync(Guid kycVerificationId)
     {
         var sql = """
-                  SELECT * FROM Addresses 
-                           WHERE KycVerificationId = @kycVerificationId
+                  SELECT * FROM "Addresses"
+                           WHERE "KycVerificationId" = @kycVerificationId
                   """;
 
         var result = await connection.QueryAsync<Address>(sql, new { kycVerificationId }, transaction);
@@ -23,9 +23,10 @@ internal sealed class AddressRepository(
     public async Task<IEnumerable<Address>> GetMostRecentAddressAsync(Guid kycVerificationId)
     {
         var sql = """
-                  SELECT top (1) * FROM Addresses 
-                           WHERE KycVerificationId = @kycVerificationId
-                           ORDER BY CreatedAt DESC
+                  SELECT * FROM "Addresses"
+                           WHERE "KycVerificationId" = @kycVerificationId
+                           ORDER BY "CreatedAt" DESC
+                           LIMIT 1
                   """;
 
         var result = await connection.QueryAsync<Address>(sql, new { kycVerificationId }, transaction);
@@ -36,13 +37,13 @@ internal sealed class AddressRepository(
         string street, string city, string state, string country)
     {
         var sql = """
-                  SELECT 1 FROM Addresses 
-                           WHERE KycVerificationId = @kycVerificationId
-                           AND HouseNumber = @houseNumber
-                           AND Street = @street
-                           AND City = @city
-                           AND State = @state
-                           AND Country = @country
+                  SELECT 1 FROM "Addresses"
+                           WHERE "KycVerificationId" = @kycVerificationId
+                           AND "HouseNumber" = @houseNumber
+                           AND "Street" = @street
+                           AND "City" = @city
+                           AND "State" = @state
+                           AND "Country" = @country
                   """;
 
         var result = await connection.ExecuteScalarAsync<int?>(sql,

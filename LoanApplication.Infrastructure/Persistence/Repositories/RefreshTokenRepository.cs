@@ -12,11 +12,11 @@ internal sealed class RefreshTokenRepository(
     public async Task<RefreshToken?> GetRefreshTokenAsync(string token)
     {
         var sql = """
-                  SELECT * FROM RefreshTokens 
-                           WHERE Token = @token
-                           AND IsRevoked = 0
-                           AND IsUsed = 0
-                           AND ExpiresAt > SWITCHOFFSET(SYSDATETIMEOFFSET(), '+00:00')
+                  SELECT * FROM "RefreshTokens"
+                           WHERE "Token" = @token
+                           AND "IsRevoked" = FALSE
+                           AND "IsUsed" = FALSE
+                           AND "ExpiresAt" > NOW()
                   """;
 
         var result = await connection.QuerySingleOrDefaultAsync<RefreshToken>(sql, new { token }, transaction);
